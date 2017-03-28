@@ -1,5 +1,5 @@
-# Medusa_Downloader
-===================
+Medusa_Downloader
+=================
 A command line tool to help download files from Medusa.
 
 Project Developers:
