@@ -6,14 +6,14 @@ pipeline {
 
         steps{
             checkout scm
-            stash includes: '**', name: "source", useDefaultExcludes: false
+            stash includes: '**', name: "Source", useDefaultExcludes: false
         }
     }
     stage('Unit Tests') {
       steps {
         sh 'ls'
         node(label: 'Windows') {
-          unstash "source"
+          unstash "Source"
           bat "${env.PYTHON3} setup.py test"
         }
 
