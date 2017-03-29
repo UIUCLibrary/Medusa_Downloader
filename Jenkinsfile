@@ -5,7 +5,7 @@ pipeline {
       agent any
 
         steps{
-          step([$class: "wsCleanup"])
+            deleteDir()
             checkout scm
             stash includes: '**', name: "Source", useDefaultExcludes: false
         }
