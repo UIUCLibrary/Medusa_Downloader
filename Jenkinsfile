@@ -12,17 +12,22 @@ pipeline {
       }
     }
     stage("Packaging") {
-    steps{
-
-      parallel(
-        "Source Release": {
-          deleteDir()
-          checkout scm
-          sh "${env.PYTHON3} setup.py sdist"
-          archiveArtifacts artifacts: "dist/**", fingerprint: true
-        },
-      )
-    }
+      steps{
+        parallel(
+          "Source Release": {
+            deleteDir()
+            checkout scm
+            sh "${env.PYTHON3} setup.py sdist"
+            archiveArtifacts artifacts: "dist/**", fingerprint: true
+          },
+          "MSI Release": {
+            deleteDir()
+            checkout scm
+            bat "${env.PYTHON3} setup.py bdist_msi"
+            archiveArtifacts artifacts: "dist/**", fingerprint: true
+          }
+        )
+      }
     }
   }
 }
