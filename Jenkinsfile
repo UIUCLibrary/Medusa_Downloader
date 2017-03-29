@@ -42,6 +42,14 @@ pipeline {
               bat "${env.PYTHON3} setup.py bdist_msi"
               archiveArtifacts artifacts: "dist/**", fingerprint: true
             }
+          },
+          "wininst Release": {
+            node(label: "Windows") {
+              deleteDir()
+              unstash "Source"
+              bat "${env.PYTHON3} setup.py bdist_wininst"
+              archiveArtifacts artifacts: "dist/**", fingerprint: true
+            }
           }
         )
       }
