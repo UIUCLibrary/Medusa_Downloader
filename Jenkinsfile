@@ -1,10 +1,13 @@
 pipeline {
   agent any
   stages {
-    stage('clone') {
+    stage('Run Tests') {
       steps {
-        echo 'cloning'
         sh 'ls'
+        node(label: 'Windows') {
+          bat 'echo "Running tests"'
+        }
+        
       }
     }
   }
