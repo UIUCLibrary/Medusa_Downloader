@@ -2,8 +2,9 @@ pipeline {
   agent any
   stages {
     stage('Checkout') {
-        steps{
+      agent any
 
+        steps{
             checkout scm
             stash includes: '**', name: "source", useDefaultExcludes: false
         }
@@ -15,7 +16,7 @@ pipeline {
           unstash "source"
           bat "${env.PYTHON3} setup.py test"
         }
-        
+
       }
     }
   }
