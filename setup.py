@@ -12,6 +12,6 @@ setup(
     entry_points={"console_scripts": ["msync=medusadownloader.msync:main"]},
     description='',
     tests_require=["pytest"],
-    test_suite="tests",
+    setup_requires=["pytest-runner"],
     install_requires=['requests']
 )
