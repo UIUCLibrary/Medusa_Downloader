@@ -13,13 +13,13 @@ pipeline {
     }
     stage("Packaging") {
       parallel(
-        "Source Release":{
+        "Source Release": {
           deleteDir()
           checkout scm
           sh "${env.PYTHON3} setup.py sdist"
           archiveArtifacts artifacts: "dist/**", fingerprint: true
-        }
-        )
+        },
+      )
     }
   }
 }
