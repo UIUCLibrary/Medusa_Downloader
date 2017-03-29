@@ -5,13 +5,13 @@ pipeline {
       agent any
 
         steps{
+          step([$class: "wsCleanup"])
             checkout scm
             stash includes: '**', name: "Source", useDefaultExcludes: false
         }
     }
     stage('Unit Tests') {
       steps {
-        sh 'ls'
         node(label: 'Windows') {
           bat "dir"
           unstash "Source"
