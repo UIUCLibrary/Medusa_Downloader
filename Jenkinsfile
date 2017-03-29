@@ -13,6 +13,7 @@ pipeline {
       steps {
         sh 'ls'
         node(label: 'Windows') {
+          bat "dir"
           unstash "Source"
           bat "${env.PYTHON3} setup.py test"
         }
