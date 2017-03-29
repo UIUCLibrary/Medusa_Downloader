@@ -4,7 +4,7 @@ pipeline {
     stage('Unit Tests') {
       steps {
         node(label: 'Windows') {
-          bat "dir"
+          checkout scm
           bat "${env.PYTHON3} setup.py testxml"
           junit 'reports/junit*.xml'
         }
