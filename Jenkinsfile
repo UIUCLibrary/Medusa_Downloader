@@ -12,6 +12,8 @@ pipeline {
       }
     }
     stage("Packaging") {
+    steps{
+
       parallel(
         "Source Release": {
           deleteDir()
@@ -20,6 +22,7 @@ pipeline {
           archiveArtifacts artifacts: "dist/**", fingerprint: true
         },
       )
+    }
     }
   }
 }
