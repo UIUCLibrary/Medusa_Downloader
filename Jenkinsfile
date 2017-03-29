@@ -5,7 +5,7 @@ pipeline {
       steps {
         sh 'ls'
         node(label: 'Windows') {
-          bat '${env.PYTHON3} --version'
+          bat "${env.PYTHON3} --version"
         }
         
       }
