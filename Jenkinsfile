@@ -4,6 +4,7 @@ pipeline {
     stage('clone') {
       steps {
         echo 'cloning'
+        sh 'ls'
       }
     }
   }
