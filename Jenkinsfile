@@ -5,7 +5,7 @@ pipeline {
       steps {
         sh 'ls'
         node(label: 'Windows') {
-          bat 'echo "Running tests"'
+          bat '${env.PYTHO3} --version'
         }
         
       }
