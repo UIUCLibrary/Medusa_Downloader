@@ -34,23 +34,15 @@ pipeline {
             sh "${env.PYTHON3} setup.py sdist"
             archiveArtifacts artifacts: "dist/**", fingerprint: true
           },
-          
+
           "MSI Release": {
             node(label: "Windows") {
               deleteDir()
               unstash "Source"
-              bat "${env.PYTHON3} setup.py bdist_msi"
+              bat "${env.PYTHON3} setup-freeze.py bdist_msi --add-to-path=true"
               archiveArtifacts artifacts: "dist/**", fingerprint: true
             }
           },
-          "wininst Release": {
-            node(label: "Windows") {
-              deleteDir()
-              unstash "Source"
-              bat "${env.PYTHON3} setup.py bdist_wininst"
-              archiveArtifacts artifacts: "dist/**", fingerprint: true
-            }
-          }
         )
       }
     }
