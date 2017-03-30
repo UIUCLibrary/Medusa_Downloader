@@ -2,14 +2,14 @@ import getpass
 import os
 import sys
 from pprint import pprint
-
+from sys import exit
 import requests
 import medusadownloader
 import argparse
 
 
 def get_args():
-    parser = argparse.ArgumentParser(description="Medusa Downloader (msync)",)
+    parser = argparse.ArgumentParser(description="Medusa Downloader (msync)", )
     parser.add_argument("--destination", default=os.getcwd())
     parser.add_argument("--confirm", action="store_true")
     parser.add_argument("--key")
@@ -31,64 +31,81 @@ def verify(question):
 
 
 def main():
-    # Get the main command line arguments
-    args = get_args()
+    try:
+        # Get the main command line arguments
 
-    # Authenticate user and password. This is required to download with medusa
-    if args.key:
-        print("Using key")
-        key = medusadownloader.read_key(args.key)
-        user = key.username
-        password = key.password
-    else:
-        # No key file is given
-        user = input("Username: ")
-        password = getpass.getpass()
+        args = get_args()
 
-    with medusadownloader.Medusa("https://medusa.library.illinois.edu", user, password) as m:
-        try:
+        # Authenticate user and password. This is required to download with medusa
+        if args.key:
+            print("Using key")
+            key = medusadownloader.read_key(args.key)
+            user = key.username
+            password = key.password
+        else:
+            # No key file is given
+            user = input("Username: ")
+            password = getpass.getpass()
 
-            if not args.confirm:
-                bit_level_md = m.get_bit_level_file_group_json(args.bit_level_group)
+        with medusadownloader.Medusa("https://medusa.library.illinois.edu", user, password) as server:
+            try:
 
-                print("Collection:")
-                pprint(m.get_collection_json(bit_level_md["collection_id"]))
+                if not args.confirm:
+                    bit_level_md = server.get_bit_level_file_group_json(args.bit_level_group)
 
-                print("File Group:")
-                pprint(bit_level_md)
+                    print("Collection:")
+                    pprint(server.get_collection_json(bit_level_md["collection_id"]))
 
-                if not verify("Is this the correct file group?"):
-                    print("Okay. Quitting.")
-                    exit()
+                    print("File Group:")
+                    pprint(bit_level_md)
 
-            files = list(m.get_file_binaries_url(args.bit_level_group))
+                    if not verify("Is this the correct file group?"):
+                        print("Okay. Quitting.")
+                        exit()
 
-            for i, f in enumerate(files):
+                files = list(server.get_file_binaries_url(args.bit_level_group))
+
                 last_message_size = 0
-                prefix = "{}/{}: ".format(str(i + 1).zfill(len(str(len(files)))), len(files))
-                print("\r{}\r{}{}".format(" " * last_message_size, prefix, f.filename), flush=True)
-                if os.path.exists(os.path.join(args.destination, f.filename)):
-                    print("{}File already downloaded. Skipping.".format(prefix))
-                    continue
-                for it, progress in enumerate(m.download(f, args.destination)):
-                    if it % 100 == 0:
-                        msg = "\r{:0.2f}%".format(progress)
-                        last_message_size = len(msg)
-                        print("{}{}".format(" " * last_message_size, msg), end="", file=sys.stderr)
-                else:
-                    print("\r{}\r".format(" " * last_message_size), end="", flush=True)
+                for i, f in enumerate(files):
+                    prefix = "{}/{}: ".format(str(i + 1).zfill(len(str(len(files)))), len(files))
+                    print("\r{}\r{}{}".format(" " * last_message_size, prefix, f.filename), flush=True)
+                    if os.path.exists(os.path.join(args.destination, f.filename)):
+                        print("{}File already downloaded. Skipping.".format(prefix))
+                        continue
 
-        except ConnectionRefusedError as e:
-            print("Medusa refused connection. Reason: {}".format(e), file=sys.stderr)
-            exit(1)
+                    try:
+                        download(f, args.destination, server)
+                    except:
+                        print("\r{}".format(" " * last_message_size))
+                        print("\nDownload Canceled", file=sys.stderr)
+                        raise
 
-        except requests.exceptions.ReadTimeout:
-            print("Connection timed out.", file=sys.stderr)
+            except ConnectionRefusedError as e:
+                print("Medusa refused connection. Reason: {}".format(e), file=sys.stderr)
+                exit(1)
 
-        except ConnectionError as e:
-            print("Connection Error. Reason: {}".format(e), file=sys.stderr)
+            except requests.exceptions.ReadTimeout:
+                print("Connection timed out.", file=sys.stderr)
 
-            exit(1)
+            except ConnectionError as e:
+                print("Connection Error. Reason: {}".format(e), file=sys.stderr)
+
+                exit(1)
+    except KeyboardInterrupt:
+        print("\n\nQuitting")
+        exit()
+
+
+def download(url, dest, server):
+    last_message_size = 0
+    try:
+        for it, progress in enumerate(server.download(url, dest)):
+            if it % 100 == 0:
+                msg = "\r{:0.2f}%".format(progress)
+                last_message_size = len(msg)
+                print("{}{}".format(" " * last_message_size, msg), end="", file=sys.stderr)
+    finally:
+        print("\r{}\r".format(" " * last_message_size), end="", flush=True)
 
 
 if __name__ == '__main__':
