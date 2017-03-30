@@ -8,6 +8,8 @@ from collections import namedtuple
 import medusadownloader.utils
 from medusadownloader import errors
 
+TIMEOUT = 5
+
 MedusaData = namedtuple("MedusaData", ['filename', 'download_link', 'metadata'])
 
 
@@ -34,7 +36,7 @@ class Medusa:
 
         """
         url = self.root + "/collections/" + str(collection_id) + ".json"
-        data = self._session.get(url, timeout=5)
+        data = self._session.get(url, timeout=TIMEOUT)
         if data.ok:
             try:
                 json_data = data.json()
@@ -58,7 +60,7 @@ class Medusa:
 
         """
         url = self.root + "/bit_level_file_groups/" + str(bit_level_file_groups) + ".json"
-        data = self._session.get(url, timeout=5)
+        data = self._session.get(url, timeout=TIMEOUT)
         if data.ok:
             try:
                 json_data = data.json()
