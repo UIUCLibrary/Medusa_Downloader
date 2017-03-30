@@ -23,7 +23,7 @@ def download(url, save_as, session, metadata):
         return zip(a, itertools.accumulate(map(lambda i: len(i), b)))
 
     dst_path = os.path.dirname(save_as)
-    r = session.get(url, timeout=5)
+    r = session.get(url, timeout=10)
     # If the data returned is not a binary file, then it's an error
     if r.encoding == "utf-8":
 
