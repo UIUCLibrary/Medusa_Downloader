@@ -1,17 +1,9 @@
 from setuptools import setup
+from shared_setup import metadata
 
-setup(
-    name='medusaDownloader',
-    version='0.0.1',
-    packages=['medusadownloader'],
-    url='https://github.com/UIUCLibrary/',
-    license='',
-    zip_safe=False,
-    author='Henry Borchers',
-    author_email='hborcher@illinois.edu',
-    entry_points={"console_scripts": ["msync=medusadownloader.msync:main"]},
-    description='',
-    tests_require=["pytest"],
-    setup_requires=["pytest-runner"],
-    install_requires=['requests']
-)
+setup(**metadata, entry_points={"console_scripts": ["msync=medusadownloader.msync:main"]},
+      tests_require=["pytest"],
+      zip_safe=False,
+      setup_requires=["pytest-runner"],
+      install_requires=['requests']
+      )
