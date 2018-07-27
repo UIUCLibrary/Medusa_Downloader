@@ -56,13 +56,13 @@ pipeline {
                         }
                     }
                 }
-                stage("Stashing important files for later"){
-                    steps{
-                       dir("source"){
-                            stash includes: 'deployment.yml', name: "Deployment"
-                       }
-                    }
-                }
+//                stage("Stashing important files for later"){
+//                    steps{
+//                       dir("source"){
+//                            stash includes: 'deployment.yml', name: "Deployment"
+//                       }
+//                    }
+//                }
                 stage("Cleanup extra dirs"){
                     steps{
                         dir("reports"){
