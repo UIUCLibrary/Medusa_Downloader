@@ -331,6 +331,24 @@ pipeline {
             }
         }
     }
+    post {
+        cleanup{
+            script {
+                if(fileExists('source/setup.py')){
+                    dir("source"){
+                        try{
+                            retry(3) {
+                                bat "${WORKSPACE}\\venv\\Scripts\\python.exe setup.py clean --all"
+                            }
+                        } catch (Exception ex) {
+                            echo "Unable to successfully run clean. Purging source directory."
+                            deleteDir()
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 //pipeline {
 //  agent any
