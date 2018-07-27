@@ -251,7 +251,7 @@ pipeline {
                 }
                 stage("MyPy"){
                     when{
-                        equals expected: true, actual: params.ADDITIONAL_TESTS
+                        equals expected: true, actual: params.TEST_RUN_MYPY
                     }
                     steps{
                         dir("source") {
