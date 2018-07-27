@@ -24,7 +24,10 @@ pipeline {
      parameters {
         booleanParam(name: "FRESH_WORKSPACE", defaultValue: false, description: "Purge workspace before staring and checking out source")
         string(name: "PROJECT_NAME", defaultValue: "Medusa Downloader", description: "Name given to the project")
-        booleanParam(name: "UNIT_TESTS", defaultValue: true, description: "Run Automated Unit Tests")
+//        booleanParam(name: "UNIT_TESTS", defaultValue: true, description: "Run Automated Unit Tests")
+        booleanParam(name: "TEST_RUN_PYTEST", defaultValue: true, description: "Run PyTest unit tests")
+        booleanParam(name: "TEST_RUN_FLAKE8", defaultValue: true, description: "Run Flake8 static analysis")
+        booleanParam(name: "TEST_RUN_MYPY", defaultValue: true, description: "Run MyPy static analysis")
         // booleanParam(name: "PACKAGE", defaultValue: true, description: "Create a Packages")
         // booleanParam(name: "DEPLOY_SCCM", defaultValue: false, description: "Deploy SCCM")
 //        booleanParam(name: "DEPLOY_DEVPI", defaultValue: true, description: "Deploy to devpi on http://devpy.library.illinois.edu/DS_Jenkins/${env.BRANCH_NAME}")
@@ -231,7 +234,7 @@ pipeline {
             parallel {
                 stage("PyTest"){
                     when {
-                        equals expected: true, actual: params.UNIT_TESTS
+                        equals expected: true, actual: params.TEST_RUN_PYTEST
                     }
                     steps{
                         dir("source"){
@@ -273,6 +276,30 @@ pipeline {
 //                    }
 //
 //                }
+                stage("Run Flake8 Static Analysis") {
+                    when {
+                        equals expected: true, actual: params.TEST_RUN_FLAKE8
+                    }
+                    steps{
+                        script{
+                            try{
+                                tee('reports/flake8.log') {
+                                    dir("source"){
+                                        bat "venv\\Scripts\\flake8.exe medusadownloader --format=pylint"
+                                    }
+                                }
+                            } catch (exc) {
+                                echo "flake8 found some warnings"
+                            }
+                        }
+                    }
+                    post {
+                        always {
+                            warnings canRunOnFailed: true, parserConfigurations: [[parserName: 'PyLint', pattern: 'reports/flake8.log']], unHealthy: ''
+                        }
+                    }
+                }
+
             }
         }
     }
