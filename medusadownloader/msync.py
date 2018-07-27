@@ -46,7 +46,7 @@ def main():
             # No key file is given
             user = input("Username: ")
             password = getpass.getpass()
-
+        failed_files = []
         with medusadownloader.Medusa("https://medusa.library.illinois.edu", user, password) as server:
             try:
 
@@ -62,8 +62,11 @@ def main():
                     if not verify("Is this the correct file group?"):
                         print("Okay. Quitting.")
                         exit()
-
-                files = list(server.get_file_binaries_url(args.bit_level_group))
+                print("Locating file binary URLs")
+                files = []
+                for file in server.get_file_binaries_url(args.bit_level_group):
+                    files.append(file)
+                    print("\rLocated {} file URLs".format(len(files)), end="")
 
                 last_message_size = 0
                 for i, f in enumerate(files):
@@ -75,6 +78,15 @@ def main():
 
                     try:
                         download(f, args.destination, server)
+                    except requests.exceptions.ReadTimeout:
+                        print("\r{}".format(" " * last_message_size))
+                        print("\nDownload timed out", file=sys.stderr)
+                        failed_files.append(f.filename)
+                        # continue
+                        while verify("Try again?"):
+                            download(f, args.destination, server)
+                            continue
+                        raise
                     except:
                         print("\r{}".format(" " * last_message_size))
                         print("\nDownload Canceled", file=sys.stderr)
@@ -91,6 +103,10 @@ def main():
                 print("Connection Error. Reason: {}".format(e), file=sys.stderr)
 
                 exit(1)
+        if failed_files:
+            print("The following files didn't download")
+            for file in failed_files:
+                print(file)
     except KeyboardInterrupt:
         print("\n\nQuitting")
         exit()

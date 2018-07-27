@@ -90,16 +90,22 @@ class Medusa:
 
         """
         binary_path = self.get_folder_json_url(bit_level_file_group_id)
+        for item in self.read_subdirectory_metadata(binary_path):
+            yield (item)
 
-        r = self._session.get(binary_path)
-        data = r.json()
-
-        for file_metadata in data['files']:
-            download_path = self.root + "/cfs_files/" + str(file_metadata['id']) + "/download"
-            relative_path = file_metadata['relative_pathname']
-            yield MedusaData(relative_path, download_path, metadata=file_metadata)
 
     def download(self, medusa_file: MedusaData, path):
         yield from medusadownloader.utils.download(url=medusa_file.download_link,
                                                    save_as=os.path.join(path, medusa_file.filename),
                                                    session=self._session, metadata=medusa_file.metadata)
+
+    def read_subdirectory_metadata(self, url):
+        r = self._session.get(url)
+        data = r.json()
+        for file_metadata in data['files']:
+            download_path = self.root + "/cfs_files/" + str(file_metadata['id']) + "/download"
+            relative_path = file_metadata['relative_pathname']
+            yield MedusaData(relative_path, download_path, metadata=file_metadata)
+        for subdirectory_metadata in data["subdirectories"]:
+            for item in self.read_subdirectory_metadata(url=self.root + subdirectory_metadata['path']):
+                yield item
