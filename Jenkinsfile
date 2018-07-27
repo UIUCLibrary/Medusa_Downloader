@@ -285,7 +285,7 @@ pipeline {
                             try{
                                 tee('reports/flake8.log') {
                                     dir("source"){
-                                        bat "venv\\Scripts\\flake8.exe medusadownloader --format=pylint"
+                                        bat "${WORKSPACE}\\venv\\Scripts\\flake8.exe medusadownloader --format=pylint"
                                     }
                                 }
                             } catch (exc) {
