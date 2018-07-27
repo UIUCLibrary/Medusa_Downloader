@@ -11,6 +11,9 @@ pipeline {
     agent {
         label "Windows"
     }
+    triggers {
+        cron('@daily')
+    }
     options {
         disableConcurrentBuilds()  //each branch has 1 job running at a time
         timeout(60)  // Timeout after 60 minutes. This shouldn't take this long but it hangs for some reason
