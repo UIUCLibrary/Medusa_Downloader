@@ -14,7 +14,6 @@ def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUse
 
 
 
-def PKG_NAME = "unknown"
 def PKG_VERSION = "unknown"
 def DOC_ZIP_FILENAME = "doc.zip"
 def junit_filename = "junit.xml"
@@ -147,13 +146,12 @@ pipeline {
                             // Set up the reports directory variable
                             REPORT_DIR = "${pwd tmp: true}\\reports"
                           dir("source"){
-                                PKG_NAME = bat(returnStdout: true, script: "@${tool 'CPython-3.6'}\\python  setup.py --name").trim()
                                 PKG_VERSION = bat(returnStdout: true, script: "@${tool 'CPython-3.6'}\\python setup.py --version").trim()
                           }
                         }
 
                         script{
-                            DOC_ZIP_FILENAME = "${PKG_NAME}-${PKG_VERSION}.doc.zip"
+                            DOC_ZIP_FILENAME = "${env.PKG_NAME}-${PKG_VERSION}.doc.zip"
                             junit_filename = "junit-${env.NODE_NAME}-${env.GIT_COMMIT.substring(0,7)}-pytest.xml"
                         }
 
@@ -183,8 +181,7 @@ pipeline {
                         }
                         always{
                             bat "dir /s / B"
-                            echo """Name                            = ${PKG_NAME}
-        Version                         = ${PKG_VERSION}
+                            echo """Version                         = ${PKG_VERSION}
         Report Directory                = ${REPORT_DIR}
         documentation zip file          = ${DOC_ZIP_FILENAME}
         Python virtual environment path = ${VENV_ROOT}
