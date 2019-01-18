@@ -1,3 +1,19 @@
+@Library(["devpi", "PythonHelpers"]) _
+def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUsername, devpiPassword){
+    script {
+            try {
+                bat "${devpiExecutable} login ${devpiUsername} --password ${devpiPassword}"
+                bat "${devpiExecutable} use ${devpiIndex}"
+                bat "${devpiExecutable} remove -y ${pkgName}==${pkgVersion}"
+            } catch (Exception ex) {
+                echo "Failed to remove ${pkgName}==${pkgVersion} from ${devpiIndex}"
+        }
+
+    }
+}
+
+
+
 def PKG_NAME = "unknown"
 def PKG_VERSION = "unknown"
 def DOC_ZIP_FILENAME = "doc.zip"
@@ -18,6 +34,13 @@ pipeline {
         disableConcurrentBuilds()  //each branch has 1 job running at a time
         timeout(60)  // Timeout after 60 minutes. This shouldn't take this long but it hangs for some reason
         checkoutToSubdirectory("source")
+    }
+    environment {
+        PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
+        PKG_NAME = pythonPackageName(toolName: "CPython-3.6")
+        PKG_VERSION = pythonPackageVersion(toolName: "CPython-3.6")
+        DOC_ZIP_FILENAME = "${env.PKG_NAME}-${env.PKG_VERSION}.doc.zip"
+        DEVPI = credentials("DS_devpi")
     }
 
     // environment {
