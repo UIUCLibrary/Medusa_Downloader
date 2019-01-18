@@ -178,6 +178,9 @@ pipeline {
                         bat "dir"
                     }
                     post{
+                        success{
+                            echo "Configured ${env.PKG_NAME}, version ${env.PKG_VERSION}, for testing."
+                        }
                         always{
                             bat "dir /s / B"
                             echo """Name                            = ${PKG_NAME}
