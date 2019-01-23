@@ -12,7 +12,6 @@ def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUse
     }
 }
 
-def junit_filename = "junit.xml"
 
 pipeline {
     agent {
@@ -79,37 +78,6 @@ pipeline {
                         }
                     }
                 }
-//                stage("Stashing important files for later"){
-//                    steps{
-//                       dir("source"){
-//                            stash includes: 'deployment.yml', name: "Deployment"
-//                       }
-//                    }
-//                }
-//                stage("Cleanup extra dirs"){
-//                    steps{
-//                        dir("reports"){
-//                            deleteDir()
-//                            echo "Cleaned out reports directory"
-//                            bat "dir"
-//                        }
-//                        dir("dist"){
-//                            deleteDir()
-//                            echo "Cleaned out dist directory"
-//                            bat "dir"
-//                        }
-//                        dir("build"){
-//                            deleteDir()
-//                            echo "Cleaned out build directory"
-//                            bat "dir"
-//                        }
-//                        dir("logs"){
-//                            deleteDir()
-//                            echo "Cleaned out logs directory"
-//                            bat "dir"
-//                        }
-//                    }
-//                }
                 stage("Creating virtualenv for building"){
                     steps{
                         bat "python -m venv venv"
@@ -131,24 +99,6 @@ pipeline {
                             bat "(if not exist logs mkdir logs) && venv\\Scripts\\pip.exe list > ${WORKSPACE}\\logs\\pippackages_venv_${NODE_NAME}.log"
                             archiveArtifacts artifacts: "logs/pippackages_venv_${NODE_NAME}.log"
                         }
-                    }
-                }
-                stage("Setting variables used by the rest of the build"){
-                    steps{
-                        script{
-                            junit_filename = "junit-${env.NODE_NAME}-${env.GIT_COMMIT.substring(0,7)}-pytest.xml"
-                        }
-
-                    }
-                    post{
-                        success{
-                            echo "Configured ${env.PKG_NAME}, version ${env.PKG_VERSION}, for testing."
-                        }
-                        always{
-                            bat "dir /s / B"
-                            echo "junit_filename = ${junit_filename}"
-                        }
-
                     }
                 }
             }
