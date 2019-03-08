@@ -206,6 +206,16 @@ pipeline {
     }
     post {
         cleanup{
+            cleanWs deleteDirs: true, patterns: [
+                    [pattern: 'source', type: 'INCLUDE'],
+                    [pattern: 'build*', type: 'INCLUDE'],
+                    [pattern: 'certs', type: 'INCLUDE'],
+                    [pattern: 'dist*', type: 'INCLUDE'],
+                    [pattern: 'logs*', type: 'INCLUDE'],
+                    [pattern: 'reports*', type: 'INCLUDE'],
+//                    [pattern: '.tox', type: 'INCLUDE'],
+                    [pattern: '*@tmp', type: 'INCLUDE']
+                    ]
             script {
                 if(fileExists('source/setup.py')){
                     dir("source"){
