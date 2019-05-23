@@ -12,7 +12,6 @@ def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUse
     }
 }
 
-def junit_filename = "junit.xml"
 
 pipeline {
     agent {
@@ -34,26 +33,12 @@ pipeline {
         DEVPI = credentials("DS_devpi")
     }
 
-    // environment {
-        //mypy_args = "--junit-xml=mypy.xml"
-        //pytest_args = "--junitxml=reports/junit-{env:OS:UNKNOWN_OS}-{envname}.xml --junit-prefix={env:OS:UNKNOWN_OS}  --basetemp={envtmpdir}"
-    // }
      parameters {
         booleanParam(name: "FRESH_WORKSPACE", defaultValue: false, description: "Purge workspace before staring and checking out source")
         string(name: "PROJECT_NAME", defaultValue: "Medusa Downloader", description: "Name given to the project")
-//        booleanParam(name: "UNIT_TESTS", defaultValue: true, description: "Run Automated Unit Tests")
         booleanParam(name: "TEST_RUN_PYTEST", defaultValue: true, description: "Run PyTest unit tests")
         booleanParam(name: "TEST_RUN_FLAKE8", defaultValue: true, description: "Run Flake8 static analysis")
         booleanParam(name: "TEST_RUN_MYPY", defaultValue: true, description: "Run MyPy static analysis")
-        // booleanParam(name: "PACKAGE", defaultValue: true, description: "Create a Packages")
-        // booleanParam(name: "DEPLOY_SCCM", defaultValue: false, description: "Deploy SCCM")
-//        booleanParam(name: "DEPLOY_DEVPI", defaultValue: true, description: "Deploy to devpi on http://devpy.library.illinois.edu/DS_Jenkins/${env.BRANCH_NAME}")
-//        booleanParam(name: "DEPLOY_DEVPI_PRODUCTION", defaultValue: false, description: "Deploy to https://devpi.library.illinois.edu/production/release")
-//        booleanParam(name: "DEPLOY_HATHI_TOOL_BETA", defaultValue: false, description: "Deploy standalone to \\\\storage.library.illinois.edu\\HathiTrust\\Tools\\beta\\")
-//        booleanParam(name: "DEPLOY_SCCM", defaultValue: false, description: "Request deployment of MSI installer to SCCM")
-//        booleanParam(name: "DEPLOY_DOCS", defaultValue: false, description: "Update online documentation")
-//        booleanParam(name: "UPDATE_DOCS", defaultValue: false, description: "Update the documentation")
-//        string(name: 'URL_SUBFOLDER', defaultValue: "hathi_validate", description: 'The directory that the docs should be saved under')
     }
     stages{
         stage("Configure") {
@@ -79,37 +64,6 @@ pipeline {
                         }
                     }
                 }
-//                stage("Stashing important files for later"){
-//                    steps{
-//                       dir("source"){
-//                            stash includes: 'deployment.yml', name: "Deployment"
-//                       }
-//                    }
-//                }
-//                stage("Cleanup extra dirs"){
-//                    steps{
-//                        dir("reports"){
-//                            deleteDir()
-//                            echo "Cleaned out reports directory"
-//                            bat "dir"
-//                        }
-//                        dir("dist"){
-//                            deleteDir()
-//                            echo "Cleaned out dist directory"
-//                            bat "dir"
-//                        }
-//                        dir("build"){
-//                            deleteDir()
-//                            echo "Cleaned out build directory"
-//                            bat "dir"
-//                        }
-//                        dir("logs"){
-//                            deleteDir()
-//                            echo "Cleaned out logs directory"
-//                            bat "dir"
-//                        }
-//                    }
-//                }
                 stage("Creating virtualenv for building"){
                     steps{
                         bat "python -m venv venv"
@@ -131,24 +85,6 @@ pipeline {
                             bat "(if not exist logs mkdir logs) && venv\\Scripts\\pip.exe list > ${WORKSPACE}\\logs\\pippackages_venv_${NODE_NAME}.log"
                             archiveArtifacts artifacts: "logs/pippackages_venv_${NODE_NAME}.log"
                         }
-                    }
-                }
-                stage("Setting variables used by the rest of the build"){
-                    steps{
-                        script{
-                            junit_filename = "junit-${env.NODE_NAME}-${env.GIT_COMMIT.substring(0,7)}-pytest.xml"
-                        }
-
-                    }
-                    post{
-                        success{
-                            echo "Configured ${env.PKG_NAME}, version ${env.PKG_VERSION}, for testing."
-                        }
-                        always{
-                            bat "dir /s / B"
-                            echo "junit_filename = ${junit_filename}"
-                        }
-
                     }
                 }
             }
@@ -270,7 +206,9 @@ pipeline {
     }
     post {
         cleanup{
-            cleanWs deleteDirs: true, patterns: [
+            cleanWs(
+                deleteDirs: true,
+                patterns: [
                     [pattern: 'source', type: 'INCLUDE'],
                     [pattern: 'build*', type: 'INCLUDE'],
                     [pattern: 'certs', type: 'INCLUDE'],
@@ -280,20 +218,7 @@ pipeline {
 //                    [pattern: '.tox', type: 'INCLUDE'],
                     [pattern: '*@tmp', type: 'INCLUDE']
                     ]
-            script {
-                if(fileExists('source/setup.py')){
-                    dir("source"){
-                        try{
-                            retry(3) {
-                                bat "${WORKSPACE}\\venv\\Scripts\\python.exe setup.py clean --all"
-                            }
-                        } catch (Exception ex) {
-                            echo "Unable to successfully run clean. Purging source directory."
-                            deleteDir()
-                        }
-                    }
-                }
-            }
+                )
         }
     }
 }
