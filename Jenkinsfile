@@ -13,6 +13,31 @@ def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUse
 }
 
 
+def get_package_version(stashName, metadataFile){
+    ws {
+        unstash "${stashName}"
+        script{
+            def props = readProperties interpolate: true, file: "${metadataFile}"
+            deleteDir()
+            return props.Version
+        }
+    }
+}
+
+def get_package_name(stashName, metadataFile){
+    ws {
+        unstash "${stashName}"
+        script{
+            def props = readProperties interpolate: true, file: "${metadataFile}"
+            deleteDir()
+            return props.Name
+        }
+    }
+}
+
+
+
+
 pipeline {
     agent {
         label "Windows"
@@ -27,18 +52,12 @@ pipeline {
     }
     environment {
         PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
-        PKG_NAME = pythonPackageName(toolName: "CPython-3.6")
-        PKG_VERSION = pythonPackageVersion(toolName: "CPython-3.6")
-        DOC_ZIP_FILENAME = "${env.PKG_NAME}-${env.PKG_VERSION}.doc.zip"
-        DEVPI = credentials("DS_devpi")
+        //DEVPI = credentials("DS_devpi")
     }
 
      parameters {
         booleanParam(name: "FRESH_WORKSPACE", defaultValue: false, description: "Purge workspace before staring and checking out source")
         string(name: "PROJECT_NAME", defaultValue: "Medusa Downloader", description: "Name given to the project")
-        booleanParam(name: "TEST_RUN_PYTEST", defaultValue: true, description: "Run PyTest unit tests")
-        booleanParam(name: "TEST_RUN_FLAKE8", defaultValue: true, description: "Run Flake8 static analysis")
-        booleanParam(name: "TEST_RUN_MYPY", defaultValue: true, description: "Run MyPy static analysis")
     }
     stages{
         stage("Configure") {
@@ -61,6 +80,24 @@ pipeline {
                     post{
                         success {
                             bat "dir /s /B"
+                        }
+                    }
+                }
+                stage("Getting Distribution Info"){
+                    environment{
+                        PATH = "${tool 'CPython-3.7'};$PATH"
+                    }
+                    steps{
+                        dir("source"){
+                            bat "python setup.py dist_info"
+                        }
+                    }
+                    post{
+                        success{
+                            dir("source"){
+                                stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
+                                archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
+                            }
                         }
                     }
                 }
@@ -116,9 +153,6 @@ pipeline {
 
             parallel {
                 stage("PyTest"){
-                    when {
-                        equals expected: true, actual: params.TEST_RUN_PYTEST
-                    }
                     steps{
                         dir("source"){
                             bat "${WORKSPACE}\\venv\\Scripts\\pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
@@ -133,9 +167,6 @@ pipeline {
                     }
                 }
                 stage("MyPy"){
-                    when{
-                        equals expected: true, actual: params.TEST_RUN_MYPY
-                    }
                     steps{
                         dir("source") {
                             bat "${WORKSPACE}\\venv\\Scripts\\mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
@@ -149,9 +180,6 @@ pipeline {
                     }
                 }
                 stage("Run Flake8 Static Analysis") {
-                    when {
-                        equals expected: true, actual: params.TEST_RUN_FLAKE8
-                    }
                     steps{
                         script{
                             try{
