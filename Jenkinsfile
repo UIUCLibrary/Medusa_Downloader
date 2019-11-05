@@ -39,9 +39,10 @@ def get_package_name(stashName, metadataFile){
 
 
 pipeline {
-    agent {
-        label "Windows && Python3"
-    }
+    agent none
+    //agent {
+    //    label "Windows && Python3"
+    //}
     triggers {
         cron('@daily')
     }
