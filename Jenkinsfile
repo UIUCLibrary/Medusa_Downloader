@@ -62,9 +62,7 @@ pipeline {
     }
     stages{
         stage("Configure") {
-            environment{
-                PATH = "${tool 'CPython-3.6'};$PATH"
-            }
+
             stages{
                 stage("Purge all existing data in workspace"){
                     when{
@@ -109,6 +107,9 @@ pipeline {
                     }
                 }
                 stage("Creating virtualenv for building"){
+                    environment{
+                        PATH = "${tool 'CPython-3.6'};$PATH"
+                    }
                     steps{
                         bat "python -m venv venv"
                         script {
