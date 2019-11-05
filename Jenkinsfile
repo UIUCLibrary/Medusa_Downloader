@@ -107,6 +107,14 @@ pipeline {
                     }
                 }
             }
+            post{
+                cleanup{
+                    cleanWs(deleteDirs: true,
+                                patterns: [[pattern: '.git', type: 'EXCLUDE']],
+                                notFailBuild: true
+                            )
+                }
+            }
         }
         stage("Tests") {
             agent{
@@ -165,6 +173,14 @@ pipeline {
                                     cleanWs(patterns: [[pattern: 'logs/flake8.log', type: 'INCLUDE']])
                                 }
                             }
+                        }
+                    }
+                    post{
+                        cleanup{
+                            cleanWs(deleteDirs: true,
+                                        patterns: [[pattern: '.git', type: 'EXCLUDE']],
+                                        notFailBuild: true
+                                    )
                         }
                     }
                 }
