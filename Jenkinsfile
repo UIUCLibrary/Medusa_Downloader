@@ -119,7 +119,6 @@ pipeline {
                 stage("Run tests"){
                     parallel {
                         stage("PyTest"){
-
                             steps{
                                 bat "pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
 
@@ -172,10 +171,6 @@ pipeline {
                     label 'windows&&docker'
                   }
             }
-            when {
-                equals expected: true, actual: params.PACKAGE_PYTHON_FORMATS
-            }
-
             steps{
                 bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
             }
