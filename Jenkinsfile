@@ -1,4 +1,3 @@
-//@Library(["devpi", "PythonHelpers"]) _
 def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUsername, devpiPassword){
     script {
             try {
