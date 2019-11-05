@@ -77,7 +77,6 @@ pipeline {
                 }
                 cleanup{
                     cleanWs(deleteDirs: true,
-                            patterns: [[pattern: '.git', type: 'EXCLUDE']],
                             notFailBuild: true
                         )
                 }
@@ -91,6 +90,7 @@ pipeline {
                   }
             }
             stages{
+
                 stage("Building Python Package"){
                     steps {
                         bat "if not exist logs mkdir logs"
@@ -110,7 +110,6 @@ pipeline {
             post{
                 cleanup{
                     cleanWs(deleteDirs: true,
-                            patterns: [[pattern: '.git', type: 'EXCLUDE']],
                             notFailBuild: true
                         )
                 }
@@ -178,7 +177,6 @@ pipeline {
                     post{
                         cleanup{
                             cleanWs(deleteDirs: true,
-                                    patterns: [[pattern: '.git', type: 'EXCLUDE']],
                                     notFailBuild: true
                                 )
                         }
@@ -203,7 +201,7 @@ pipeline {
                 }
                 cleanup{
                     cleanWs(deleteDirs: true,
-                            patterns: [[pattern: '.git', type: 'EXCLUDE']],
+                            
                             notFailBuild: true
                         )
                 }
