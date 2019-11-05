@@ -49,7 +49,6 @@ pipeline {
     options {
         disableConcurrentBuilds()  //each branch has 1 job running at a time
         timeout(60)  // Timeout after 60 minutes. This shouldn't take this long but it hangs for some reason
-        checkoutToSubdirectory("source")
     }
     //environment {
     //    PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
@@ -90,21 +89,16 @@ pipeline {
                       //}
                       dockerfile {
                             filename 'ci\\docker\\windows\\Dockerfile'
-                            dir 'source'
                             label 'windows&&docker'
                           }
                     }
                     steps{
-                        dir("source"){
-                            bat "python setup.py dist_info"
-                        }
+                        bat "python setup.py dist_info"
                     }
                     post{
                         success{
-                            dir("source"){
-                                stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
-                                archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
-                            }
+                            stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
+                            archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
                         }
                     }
                 }
@@ -140,23 +134,18 @@ pipeline {
             agent{
                 dockerfile {
                     filename 'ci\\docker\\windows\\Dockerfile'
-                    dir 'source'
                     label 'windows&&docker'
                   }
             }
             stages{
                 stage("Building Python Package"){
                     steps {
-
-
-                        dir("source"){
-                            powershell "& ${WORKSPACE}\\venv\\Scripts\\python.exe setup.py build -b ${WORKSPACE}\\build  | tee ${WORKSPACE}\\logs\\build.log"
-                        }
+                        bat "if not exist logs mkdir logs"
+                        powershell "& python setup.py build -b build  | tee logs\\build.log"
 
                     }
                     post{
                         always{
-                            warnings canRunOnFailed: true, parserConfigurations: [[parserName: 'Pep8', pattern: 'logs/build.log']]
                             archiveArtifacts artifacts: "logs/build.log"
                         }
                         failure{
