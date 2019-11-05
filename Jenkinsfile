@@ -64,78 +64,86 @@ pipeline {
         stage("Configure") {
 
             stages{
-                stage("Purge all existing data in workspace"){
-                    when{
-                        equals expected: true, actual: params.FRESH_WORKSPACE
-                    }
-                    steps {
-                        deleteDir()
-                        bat "dir"
-                        echo "Cloning source"
-                        dir("source"){
-                            checkout scm
-                        }
-                    }
-                    post{
-                        success {
-                            bat "dir /s /B"
-                        }
-                    }
-                }
+                //stage("Purge all existing data in workspace"){
+                //    when{
+                //        equals expected: true, actual: params.FRESH_WORKSPACE
+                //    }
+                //    steps {
+                //        deleteDir()
+                //        bat "dir"
+                //        echo "Cloning source"
+                //        dir("source"){
+                //            checkout scm
+                //        }
+                //    }
+                //    post{
+                //        success {
+                //            bat "dir /s /B"
+                //        }
+                //    }
+                //}
                 stage("Getting Distribution Info"){
-                    //environment{
-                    //    PATH = "${tool 'CPython-3.7'};$PATH"
-                    //}
                     agent {
-                      docker {
-                        image 'python:3.7'
-                        label 'windows&&docker'
-                      }
+                      //docker {
+                      //  image 'python:3.7'
+                      //  label 'windows&&docker'
+                      //}
+                      dockerfile {
+                            filename 'ci/docker/windows/Dockerfile'
+                            dir 'source'
+                            label 'windows&&docker'
+                          }
                     }
                     steps{
-                        powershell "certutil -generateSSTFromWU roots.sst ; certutil -addstore -f root roots.sst ; del roots.sst"
                         dir("source"){
-                            bat "python setup.py egg_info"
+                            bat "python setup.py dist_info"
                         }
                     }
                     post{
                         success{
                             dir("source"){
-                                stash includes: "medusaDownloader.egg-info/**", name: 'DIST-INFO'
-                                archiveArtifacts artifacts: "medusaDownloader.egg-info/**"
+                                stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
+                                archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
                             }
                         }
                     }
                 }
-                stage("Creating virtualenv for building"){
-                    environment{
-                        PATH = "${tool 'CPython-3.6'};$PATH"
-                    }
-                    steps{
-                        bat "python -m venv venv"
-                        script {
-                            try {
-                                bat "call venv\\Scripts\\python.exe -m pip install -U pip"
-                            }
-                            catch (exc) {
-                                bat "python -m venv venv"
-                                bat "call venv\\Scripts\\python.exe -m pip install -U pip --no-cache-dir"
-                            }
-                        }
-                        bat "venv\\Scripts\\pip.exe install -U setuptools"
-                        bat "venv\\Scripts\\pip.exe install tox pytest pytest-cov lxml mypy flake8 sphinx wheel --upgrade-strategy only-if-needed"
-//                        bat "venv\\Scripts\\pip.exe install detox==0.13 tox==3.2.1 mypy pytest pytest-cov flake8 sphinx wheel"
-                    }
-                    post{
-                        success{
-                            bat "(if not exist logs mkdir logs) && venv\\Scripts\\pip.exe list > ${WORKSPACE}\\logs\\pippackages_venv_${NODE_NAME}.log"
-                            archiveArtifacts artifacts: "logs/pippackages_venv_${NODE_NAME}.log"
-                        }
-                    }
-                }
+                //stage("Creating virtualenv for building"){
+                //    environment{
+                //        PATH = "${tool 'CPython-3.6'};$PATH"
+                //    }
+                //    steps{
+                //        bat "python -m venv venv"
+                //        script {
+                //            try {
+                //                bat "call venv\\Scripts\\python.exe -m pip install -U pip"
+                //            }
+                //            catch (exc) {
+                //                bat "python -m venv venv"
+                //                bat "call venv\\Scripts\\python.exe -m pip install -U pip --no-cache-dir"
+                //            }
+                //        }
+                //        bat "venv\\Scripts\\pip.exe install -U setuptools"
+                //        bat "venv\\Scripts\\pip.exe install tox pytest pytest-cov lxml mypy flake8 sphinx wheel --upgrade-strategy only-if-needed"
+//              //          bat "venv\\Scripts\\pip.exe install detox==0.13 tox==3.2.1 mypy pytest pytest-cov flake8 sphinx wheel"
+                //    }
+                //    post{
+                //        success{
+                //            bat "(if not exist logs mkdir logs) && venv\\Scripts\\pip.exe list > ${WORKSPACE}\\logs\\pippackages_venv_${NODE_NAME}.log"
+                //            archiveArtifacts artifacts: "logs/pippackages_venv_${NODE_NAME}.log"
+                //        }
+                //    }
+                //}
             }
         }
         stage("Build"){
+            agent{
+                dockerfile {
+                    filename 'ci/docker/windows/Dockerfile'
+                    dir 'source'
+                    label 'windows&&docker'
+                  }
+            }
             stages{
                 stage("Building Python Package"){
                     steps {
@@ -159,9 +167,15 @@ pipeline {
             }
         }
         stage("Tests") {
-
             parallel {
                 stage("PyTest"){
+                    agent{
+                        dockerfile {
+                            filename 'ci/docker/windows/Dockerfile'
+                            dir 'source'
+                            label 'windows&&docker'
+                          }
+                    }
                     steps{
                         dir("source"){
                             bat "${WORKSPACE}\\venv\\Scripts\\pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
@@ -176,6 +190,13 @@ pipeline {
                     }
                 }
                 stage("MyPy"){
+                    agent{
+                        dockerfile {
+                            filename 'ci/docker/windows/Dockerfile'
+                            dir 'source'
+                            label 'windows&&docker'
+                          }
+                    }
                     steps{
                         dir("source") {
                             bat "${WORKSPACE}\\venv\\Scripts\\mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
@@ -189,6 +210,13 @@ pipeline {
                     }
                 }
                 stage("Run Flake8 Static Analysis") {
+                    agent{
+                        dockerfile {
+                            filename 'ci/docker/windows/Dockerfile'
+                            dir 'source'
+                            label 'windows&&docker'
+                          }
+                    }
                     steps{
                         script{
                             try{
@@ -213,8 +241,16 @@ pipeline {
             }
         }
         stage("Packaging") {
+
             parallel {
                 stage("Source and Wheel formats"){
+                    agent{
+                        dockerfile {
+                            filename 'ci/docker/windows/Dockerfile'
+                            dir 'source'
+                            label 'windows&&docker'
+                          }
+                    }
                     when {
                         equals expected: true, actual: params.PACKAGE_PYTHON_FORMATS
                     }
