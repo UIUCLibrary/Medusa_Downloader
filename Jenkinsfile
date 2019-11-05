@@ -48,7 +48,7 @@ pipeline {
     }
     options {
         disableConcurrentBuilds()  //each branch has 1 job running at a time
-        timeout(60)  // Timeout after 60 minutes. This shouldn't take this long but it hangs for some reason
+
     }
     //environment {
     //    PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
@@ -66,6 +66,9 @@ pipeline {
                     filename 'ci\\docker\\windows\\Dockerfile'
                     label 'windows&&docker'
                   }
+            }
+            options{
+                timeout(5)
             }
             steps{
                 bat "python setup.py dist_info"
@@ -88,6 +91,9 @@ pipeline {
                     filename 'ci\\docker\\windows\\Dockerfile'
                     label 'windows&&docker'
                   }
+            }
+            options{
+                timeout(5)
             }
             stages{
 
@@ -121,6 +127,9 @@ pipeline {
                     filename 'ci\\docker\\windows\\Dockerfile'
                     label 'windows&&docker'
                   }
+            }
+            options{
+                timeout(5)
             }
             stages{
                 stage("Setting up tests"){
@@ -190,6 +199,9 @@ pipeline {
                     filename 'ci\\docker\\windows\\Dockerfile'
                     label 'windows&&docker'
                   }
+            }
+            options{
+                timeout(5)
             }
             steps{
                 bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
