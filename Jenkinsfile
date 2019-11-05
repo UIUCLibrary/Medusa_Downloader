@@ -77,6 +77,7 @@ pipeline {
                 }
                 cleanup{
                     cleanWs(deleteDirs: true,
+                            patterns: [[pattern: '.git', type: 'EXCLUDE']],
                             notFailBuild: true
                         )
                 }
