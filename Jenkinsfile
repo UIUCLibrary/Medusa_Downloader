@@ -60,74 +60,21 @@ pipeline {
         string(name: "PROJECT_NAME", defaultValue: "Medusa Downloader", description: "Name given to the project")
     }
     stages{
-        stage("Configure") {
-
-            stages{
-                //stage("Purge all existing data in workspace"){
-                //    when{
-                //        equals expected: true, actual: params.FRESH_WORKSPACE
-                //    }
-                //    steps {
-                //        deleteDir()
-                //        bat "dir"
-                //        echo "Cloning source"
-                //        dir("source"){
-                //            checkout scm
-                //        }
-                //    }
-                //    post{
-                //        success {
-                //            bat "dir /s /B"
-                //        }
-                //    }
-                //}
-                stage("Getting Distribution Info"){
-                    agent {
-                      //docker {
-                      //  image 'python:3.7'
-                      //  label 'windows&&docker'
-                      //}
-                      dockerfile {
-                            filename 'ci\\docker\\windows\\Dockerfile'
-                            label 'windows&&docker'
-                          }
-                    }
-                    steps{
-                        bat "python setup.py dist_info"
-                    }
-                    post{
-                        success{
-                            stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
-                            archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
-                        }
-                    }
+        stage("Getting Distribution Info"){
+            agent {
+              dockerfile {
+                    filename 'ci\\docker\\windows\\Dockerfile'
+                    label 'windows&&docker'
+                  }
+            }
+            steps{
+                bat "python setup.py dist_info"
+            }
+            post{
+                success{
+                    stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
+                    archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
                 }
-                //stage("Creating virtualenv for building"){
-                //    environment{
-                //        PATH = "${tool 'CPython-3.6'};$PATH"
-                //    }
-                //    steps{
-                //        bat "python -m venv venv"
-                //        script {
-                //            try {
-                //                bat "call venv\\Scripts\\python.exe -m pip install -U pip"
-                //            }
-                //            catch (exc) {
-                //                bat "python -m venv venv"
-                //                bat "call venv\\Scripts\\python.exe -m pip install -U pip --no-cache-dir"
-                //            }
-                //        }
-                //        bat "venv\\Scripts\\pip.exe install -U setuptools"
-                //        bat "venv\\Scripts\\pip.exe install tox pytest pytest-cov lxml mypy flake8 sphinx wheel --upgrade-strategy only-if-needed"
-//              //          bat "venv\\Scripts\\pip.exe install detox==0.13 tox==3.2.1 mypy pytest pytest-cov flake8 sphinx wheel"
-                //    }
-                //    post{
-                //        success{
-                //            bat "(if not exist logs mkdir logs) && venv\\Scripts\\pip.exe list > ${WORKSPACE}\\logs\\pippackages_venv_${NODE_NAME}.log"
-                //            archiveArtifacts artifacts: "logs/pippackages_venv_${NODE_NAME}.log"
-                //        }
-                //    }
-                //}
             }
         }
         stage("Build"){
@@ -252,23 +199,23 @@ pipeline {
             }
         }
     }
-    post {
-        cleanup{
-            cleanWs(
-                deleteDirs: true,
-                patterns: [
-                    [pattern: 'source', type: 'INCLUDE'],
-                    [pattern: 'build*', type: 'INCLUDE'],
-                    [pattern: 'certs', type: 'INCLUDE'],
-                    [pattern: 'dist*', type: 'INCLUDE'],
-                    [pattern: 'logs*', type: 'INCLUDE'],
-                    [pattern: 'reports*', type: 'INCLUDE'],
-//                    [pattern: '.tox', type: 'INCLUDE'],
-                    [pattern: '*@tmp', type: 'INCLUDE']
-                    ]
-                )
-        }
-    }
+    //post {
+    //    cleanup{
+    //        cleanWs(
+    //            deleteDirs: true,
+    //            patterns: [
+    //                [pattern: 'source', type: 'INCLUDE'],
+    //                [pattern: 'build*', type: 'INCLUDE'],
+    //                [pattern: 'certs', type: 'INCLUDE'],
+    //                [pattern: 'dist*', type: 'INCLUDE'],
+    //                [pattern: 'logs*', type: 'INCLUDE'],
+    //                [pattern: 'reports*', type: 'INCLUDE'],
+//  //                  [pattern: '.tox', type: 'INCLUDE'],
+    //                [pattern: '*@tmp', type: 'INCLUDE']
+    //                ]
+    //            )
+    //    }
+    //}
 }
 //pipeline {
 //  agent any
