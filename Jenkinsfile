@@ -89,14 +89,14 @@ pipeline {
                     }
                     steps{
                         dir("source"){
-                            bat "python setup.py dist_info"
+                            bat "python setup.py egg_info"
                         }
                     }
                     post{
                         success{
                             dir("source"){
-                                stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
-                                archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
+                                stash includes: "medusaDownloader.egg-info/**", name: 'DIST-INFO'
+                                archiveArtifacts artifacts: "medusaDownloader.egg-info/**"
                             }
                         }
                     }
