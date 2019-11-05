@@ -201,6 +201,12 @@ pipeline {
                 success {
                     archiveArtifacts artifacts: "dist/*.whl,dist/*.tar.gz,dist/*.zip", fingerprint: true
                 }
+                cleanup{
+                    cleanWs(deleteDirs: true,
+                            patterns: [[pattern: '.git', type: 'EXCLUDE']],
+                            notFailBuild: true
+                        )
+                }
             }
         }
     }
