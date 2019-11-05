@@ -161,14 +161,11 @@ pipeline {
                     agent{
                         dockerfile {
                             filename 'ci\\docker\\windows\\Dockerfile'
-                            dir 'source'
                             label 'windows&&docker'
                           }
                     }
                     steps{
-                        dir("source"){
-                            bat "${WORKSPACE}\\venv\\Scripts\\pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
-                        }
+                        bat "pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
 
                     }
                     post {
@@ -182,14 +179,11 @@ pipeline {
                     agent{
                         dockerfile {
                             filename 'ci\\docker\\windows\\Dockerfile'
-                            dir 'source'
                             label 'windows&&docker'
                           }
                     }
                     steps{
-                        dir("source") {
-                            bat "${WORKSPACE}\\venv\\Scripts\\mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
-                        }
+                        bat "mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
                     }
                     post{
                         always {
@@ -202,16 +196,13 @@ pipeline {
                     agent{
                         dockerfile {
                             filename 'ci\\docker\\windows\\Dockerfile'
-                            dir 'source'
                             label 'windows&&docker'
                           }
                     }
                     steps{
                         script{
                             try{
-                                dir("source"){
-                                    bat "${WORKSPACE}\\venv\\Scripts\\flake8.exe hsw --format=medusadownloader --tee --output-file=${WORKSPACE}\\logs\\flake8.log"
-                                }
+                                bat "flake8 medusadownloader --tee --output-file=${WORKSPACE}\\logs\\flake8.log"
                             } catch (exc) {
                                 echo "flake8 found some warnings"
                             }
