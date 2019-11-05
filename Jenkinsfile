@@ -110,9 +110,9 @@ pipeline {
             post{
                 cleanup{
                     cleanWs(deleteDirs: true,
-                                patterns: [[pattern: '.git', type: 'EXCLUDE']],
-                                notFailBuild: true
-                            )
+                            patterns: [[pattern: '.git', type: 'EXCLUDE']],
+                            notFailBuild: true
+                        )
                 }
             }
         }
@@ -178,9 +178,9 @@ pipeline {
                     post{
                         cleanup{
                             cleanWs(deleteDirs: true,
-                                        patterns: [[pattern: '.git', type: 'EXCLUDE']],
-                                        notFailBuild: true
-                                    )
+                                    patterns: [[pattern: '.git', type: 'EXCLUDE']],
+                                    notFailBuild: true
+                                )
                         }
                     }
                 }
