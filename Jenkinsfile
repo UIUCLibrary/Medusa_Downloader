@@ -177,14 +177,7 @@ pipeline {
 
             post {
                 success {
-                    dir("dist") {
-                        archiveArtifacts artifacts: "*.whl", fingerprint: true
-                        archiveArtifacts artifacts: "*.tar.gz", fingerprint: true
-                        archiveArtifacts artifacts: "*.zip", fingerprint: true
-                    }
-                }
-                failure {
-                    echo "Failed to package."
+                    archiveArtifacts artifacts: "dist/*.whl,dist/*.tar.gz,dist/*.zip", fingerprint: true
                 }
             }
         }
