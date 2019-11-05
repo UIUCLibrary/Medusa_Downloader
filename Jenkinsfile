@@ -132,11 +132,11 @@ pipeline {
                         }
                         stage("MyPy"){
                             steps{
-                                bat "mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
+                                bat "mypy.exe -p medusadownloader --html-report ${WORKSPACE}/reports/mypy_html > logs\\mypy.log"
                             }
                             post{
                                 always {
-                                    junit "junit-${env.NODE_NAME}-mypy.xml"
+                                    recordIssues(tools: [myPy(pattern: "logs/mypy.log")])
                                     publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'reports/mypy_html', reportFiles: 'index.html', reportName: 'MyPy', reportTitles: ''])
                                 }
                             }
@@ -153,7 +153,7 @@ pipeline {
                             }
                             post {
                                 always {
-                                    warnings canRunOnFailed: true, parserConfigurations: [[parserName: 'PyLint', pattern: 'logs/flake8.log']], unHealthy: ''
+                                    recordIssues(tools: [flake8(pattern: 'logs/flake8.log')])
                                 }
                                 cleanup{
                                     cleanWs(patterns: [[pattern: 'logs/flake8.log', type: 'INCLUDE']])
