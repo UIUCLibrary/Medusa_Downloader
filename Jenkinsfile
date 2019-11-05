@@ -50,10 +50,10 @@ pipeline {
         timeout(60)  // Timeout after 60 minutes. This shouldn't take this long but it hangs for some reason
         checkoutToSubdirectory("source")
     }
-    environment {
-        PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
-        //DEVPI = credentials("DS_devpi")
-    }
+    //environment {
+    //    PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
+    //    //DEVPI = credentials("DS_devpi")
+    //}
 
      parameters {
         booleanParam(name: "FRESH_WORKSPACE", defaultValue: false, description: "Purge workspace before staring and checking out source")
