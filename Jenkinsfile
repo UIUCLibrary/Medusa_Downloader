@@ -93,6 +93,7 @@ pipeline {
                       }
                     }
                     steps{
+                        powershell "certutil -generateSSTFromWU roots.sst ; certutil -addstore -f root roots.sst ; del roots.sst"
                         dir("source"){
                             bat "python setup.py egg_info"
                         }
