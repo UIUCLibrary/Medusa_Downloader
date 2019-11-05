@@ -1,4 +1,4 @@
-@Library(["devpi", "PythonHelpers"]) _
+//@Library(["devpi", "PythonHelpers"]) _
 def remove_from_devpi(devpiExecutable, pkgName, pkgVersion, devpiIndex, devpiUsername, devpiPassword){
     script {
             try {
@@ -40,9 +40,6 @@ def get_package_name(stashName, metadataFile){
 
 pipeline {
     agent none
-    //agent {
-    //    label "Windows && Python3"
-    //}
     triggers {
         cron('@daily')
     }
@@ -50,10 +47,6 @@ pipeline {
         disableConcurrentBuilds()  //each branch has 1 job running at a time
 
     }
-    //environment {
-    //    PATH = "${tool 'CPython-3.6'};${tool 'CPython-3.7'};$PATH"
-    //    //DEVPI = credentials("DS_devpi")
-    //}
 
      parameters {
         booleanParam(name: "FRESH_WORKSPACE", defaultValue: false, description: "Purge workspace before staring and checking out source")
@@ -220,71 +213,4 @@ pipeline {
             }
         }
     }
-    //post {
-    //    cleanup{
-    //        cleanWs(
-    //            deleteDirs: true,
-    //            patterns: [
-    //                [pattern: 'source', type: 'INCLUDE'],
-    //                [pattern: 'build*', type: 'INCLUDE'],
-    //                [pattern: 'certs', type: 'INCLUDE'],
-    //                [pattern: 'dist*', type: 'INCLUDE'],
-    //                [pattern: 'logs*', type: 'INCLUDE'],
-    //                [pattern: 'reports*', type: 'INCLUDE'],
-//  //                  [pattern: '.tox', type: 'INCLUDE'],
-    //                [pattern: '*@tmp', type: 'INCLUDE']
-    //                ]
-    //            )
-    //    }
-    //}
 }
-//pipeline {
-//  agent any
-//  stages {
-//    stage("Cloning Source") {
-//            agent any
-//
-//            steps {
-//                deleteDir()
-//                echo "Cloning source"
-//                checkout scm
-//                stash includes: '**', name: "Source", useDefaultExcludes: false
-//
-//            }
-//
-//        }
-//
-//    stage('Unit Tests') {
-//      steps {
-//        node(label: 'Windows') {
-//          deleteDir()
-//          unstash "Source"
-//          bat "${env.PYTHON3} setup.py testxml"
-//          junit 'reports/junit*.xml'
-//        }
-//
-//      }
-//    }
-//    stage("Packaging") {
-//      steps{
-//        parallel(
-//          "Source Release": {
-//            deleteDir()
-//            unstash "Source"
-//            sh "${env.PYTHON3} setup.py sdist"
-//            archiveArtifacts artifacts: "dist/**", fingerprint: true
-//          },
-//
-//          "MSI Release": {
-//            node(label: "Windows") {
-//              deleteDir()
-//              unstash "Source"
-//              bat "${env.PYTHON3} setup-freeze.py bdist_msi --add-to-path=true"
-//              archiveArtifacts artifacts: "dist/**", fingerprint: true
-//            }
-//          },
-//        )
-//      }
-//    }
-//  }
-//}
