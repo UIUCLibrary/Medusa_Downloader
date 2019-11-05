@@ -75,6 +75,9 @@ pipeline {
                     stash includes: "medusaDownloader.dist-info/**", name: 'DIST-INFO'
                     archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
                 }
+                cleanup{
+                    cleanWs()
+                }
             }
         }
         stage("Build"){
