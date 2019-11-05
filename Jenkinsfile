@@ -76,7 +76,9 @@ pipeline {
                     archiveArtifacts artifacts: "medusaDownloader.dist-info/**"
                 }
                 cleanup{
-                    cleanWs()
+                    cleanWs(deleteDirs: true,
+                            notFailBuild: true
+                        )
                 }
             }
         }
