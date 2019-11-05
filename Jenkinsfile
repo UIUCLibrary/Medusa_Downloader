@@ -89,7 +89,7 @@ pipeline {
                       //  label 'windows&&docker'
                       //}
                       dockerfile {
-                            filename 'ci/docker/windows/Dockerfile'
+                            filename 'ci\\docker\\windows\\Dockerfile'
                             dir 'source'
                             label 'windows&&docker'
                           }
@@ -139,7 +139,7 @@ pipeline {
         stage("Build"){
             agent{
                 dockerfile {
-                    filename 'ci/docker/windows/Dockerfile'
+                    filename 'ci\\docker\\windows\\Dockerfile'
                     dir 'source'
                     label 'windows&&docker'
                   }
@@ -171,7 +171,7 @@ pipeline {
                 stage("PyTest"){
                     agent{
                         dockerfile {
-                            filename 'ci/docker/windows/Dockerfile'
+                            filename 'ci\\docker\\windows\\Dockerfile'
                             dir 'source'
                             label 'windows&&docker'
                           }
@@ -192,7 +192,7 @@ pipeline {
                 stage("MyPy"){
                     agent{
                         dockerfile {
-                            filename 'ci/docker/windows/Dockerfile'
+                            filename 'ci\\docker\\windows\\Dockerfile'
                             dir 'source'
                             label 'windows&&docker'
                           }
@@ -212,7 +212,7 @@ pipeline {
                 stage("Run Flake8 Static Analysis") {
                     agent{
                         dockerfile {
-                            filename 'ci/docker/windows/Dockerfile'
+                            filename 'ci\\docker\\windows\\Dockerfile'
                             dir 'source'
                             label 'windows&&docker'
                           }
@@ -246,7 +246,7 @@ pipeline {
                 stage("Source and Wheel formats"){
                     agent{
                         dockerfile {
-                            filename 'ci/docker/windows/Dockerfile'
+                            filename 'ci\\docker\\windows\\Dockerfile'
                             dir 'source'
                             label 'windows&&docker'
                           }
