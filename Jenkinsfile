@@ -166,35 +166,30 @@ pipeline {
             }
         }
         stage("Packaging") {
+            agent{
+                dockerfile {
+                    filename 'ci\\docker\\windows\\Dockerfile'
+                    label 'windows&&docker'
+                  }
+            }
+            when {
+                equals expected: true, actual: params.PACKAGE_PYTHON_FORMATS
+            }
 
-            parallel {
-                stage("Source and Wheel formats"){
-                    agent{
-                        dockerfile {
-                            filename 'ci\\docker\\windows\\Dockerfile'
-                            label 'windows&&docker'
-                          }
-                    }
-                    when {
-                        equals expected: true, actual: params.PACKAGE_PYTHON_FORMATS
-                    }
+            steps{
+                bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
+            }
 
-                    steps{
-                        bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
+            post {
+                success {
+                    dir("dist") {
+                        archiveArtifacts artifacts: "*.whl", fingerprint: true
+                        archiveArtifacts artifacts: "*.tar.gz", fingerprint: true
+                        archiveArtifacts artifacts: "*.zip", fingerprint: true
                     }
-
-                    post {
-                        success {
-                            dir("dist") {
-                                archiveArtifacts artifacts: "*.whl", fingerprint: true
-                                archiveArtifacts artifacts: "*.tar.gz", fingerprint: true
-                                archiveArtifacts artifacts: "*.zip", fingerprint: true
-                            }
-                        }
-                        failure {
-                            echo "Failed to package."
-                        }
-                    }
+                }
+                failure {
+                    echo "Failed to package."
                 }
             }
         }
