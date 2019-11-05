@@ -225,7 +225,6 @@ pipeline {
                     agent{
                         dockerfile {
                             filename 'ci\\docker\\windows\\Dockerfile'
-                            dir 'source'
                             label 'windows&&docker'
                           }
                     }
@@ -234,9 +233,7 @@ pipeline {
                     }
 
                     steps{
-                        dir("source"){
-                            bat script: "venv\\Scripts\\python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
-                        }
+                        bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
                     }
 
                     post {
