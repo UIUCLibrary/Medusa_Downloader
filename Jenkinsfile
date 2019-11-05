@@ -163,6 +163,12 @@ pipeline {
                   }
             }
             stages{
+                stage("Setting up tests"){
+                    steps{
+                        bat "if not exist logs mkdir logs"
+                        bat "if not exist reports mkdir reports"
+                    }
+                }
                 stage("Run tests"){
                     parallel {
                         stage("PyTest"){
