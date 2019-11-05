@@ -84,8 +84,14 @@ pipeline {
                     }
                 }
                 stage("Getting Distribution Info"){
-                    environment{
-                        PATH = "${tool 'CPython-3.7'};$PATH"
+                    //environment{
+                    //    PATH = "${tool 'CPython-3.7'};$PATH"
+                    //}
+                    agent {
+                      docker {
+                        image 'python:3.7'
+                        label 'windows&&docker'
+                      }
                     }
                     steps{
                         dir("source"){
