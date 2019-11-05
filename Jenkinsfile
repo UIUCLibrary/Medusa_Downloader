@@ -156,68 +156,60 @@ pipeline {
             }
         }
         stage("Tests") {
-            parallel {
-                stage("PyTest"){
-                    agent{
-                        dockerfile {
-                            filename 'ci\\docker\\windows\\Dockerfile'
-                            label 'windows&&docker'
-                          }
-                    }
-                    steps{
-                        bat "pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
+            agent{
+                dockerfile {
+                    filename 'ci\\docker\\windows\\Dockerfile'
+                    label 'windows&&docker'
+                  }
+            }
+            stages{
+                stage("Run tests"){
+                    parallel {
+                        stage("PyTest"){
 
-                    }
-                    post {
-                        always{
-                            junit "reports/junit-${env.NODE_NAME}-pytest.xml"
-                            publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'reports/coverage', reportFiles: 'index.html', reportName: 'Coverage', reportTitles: ''])
+                            steps{
+                                bat "pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
+
+                            }
+                            post {
+                                always{
+                                    junit "reports/junit-${env.NODE_NAME}-pytest.xml"
+                                    publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'reports/coverage', reportFiles: 'index.html', reportName: 'Coverage', reportTitles: ''])
+                                }
+                            }
                         }
-                    }
-                }
-                stage("MyPy"){
-                    agent{
-                        dockerfile {
-                            filename 'ci\\docker\\windows\\Dockerfile'
-                            label 'windows&&docker'
-                          }
-                    }
-                    steps{
-                        bat "mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
-                    }
-                    post{
-                        always {
-                            junit "junit-${env.NODE_NAME}-mypy.xml"
-                            publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'reports/mypy_html', reportFiles: 'index.html', reportName: 'MyPy', reportTitles: ''])
+                        stage("MyPy"){
+                            steps{
+                                bat "mypy.exe -p medusadownloader --junit-xml=${WORKSPACE}/junit-${env.NODE_NAME}-mypy.xml --html-report ${WORKSPACE}/reports/mypy_html"
+                            }
+                            post{
+                                always {
+                                    junit "junit-${env.NODE_NAME}-mypy.xml"
+                                    publishHTML([allowMissing: true, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'reports/mypy_html', reportFiles: 'index.html', reportName: 'MyPy', reportTitles: ''])
+                                }
+                            }
                         }
-                    }
-                }
-                stage("Run Flake8 Static Analysis") {
-                    agent{
-                        dockerfile {
-                            filename 'ci\\docker\\windows\\Dockerfile'
-                            label 'windows&&docker'
-                          }
-                    }
-                    steps{
-                        script{
-                            try{
-                                bat "flake8 medusadownloader --tee --output-file=${WORKSPACE}\\logs\\flake8.log"
-                            } catch (exc) {
-                                echo "flake8 found some warnings"
+                        stage("Run Flake8 Static Analysis") {
+                            steps{
+                                script{
+                                    try{
+                                        bat "flake8 medusadownloader --tee --output-file=${WORKSPACE}\\logs\\flake8.log"
+                                    } catch (exc) {
+                                        echo "flake8 found some warnings"
+                                    }
+                                }
+                            }
+                            post {
+                                always {
+                                    warnings canRunOnFailed: true, parserConfigurations: [[parserName: 'PyLint', pattern: 'logs/flake8.log']], unHealthy: ''
+                                }
+                                cleanup{
+                                    cleanWs(patterns: [[pattern: 'logs/flake8.log', type: 'INCLUDE']])
+                                }
                             }
                         }
                     }
-                    post {
-                        always {
-                            warnings canRunOnFailed: true, parserConfigurations: [[parserName: 'PyLint', pattern: 'logs/flake8.log']], unHealthy: ''
-                        }
-                        cleanup{
-                            cleanWs(patterns: [[pattern: 'logs/flake8.log', type: 'INCLUDE']])
-                        }
-                    }
                 }
-
             }
         }
         stage("Packaging") {
