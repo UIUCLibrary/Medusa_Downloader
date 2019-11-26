@@ -83,15 +83,14 @@ pipeline {
                     label 'windows&&docker'
                   }
             }
-            options{
-                timeout(5)
-            }
             stages{
 
                 stage("Building Python Package"){
                     steps {
-                        bat "if not exist logs mkdir logs"
-                        powershell "& python setup.py build -b build  | tee logs\\build.log"
+                        timeout(5){   
+                            bat "if not exist logs mkdir logs"
+                            powershell "& python setup.py build -b build  | tee logs\\build.log"
+                        }
 
                     }
                     post{
