@@ -190,11 +190,10 @@ pipeline {
                     label 'windows&&docker'
                   }
             }
-            options{
-                timeout(5)
-            }
             steps{
-                bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
+                timeout(5){
+                    bat script: "python.exe setup.py sdist -d ${WORKSPACE}\\dist bdist_wheel -d ${WORKSPACE}\\dist"
+                }
             }
 
             post {
