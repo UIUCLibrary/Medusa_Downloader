@@ -118,9 +118,6 @@ pipeline {
                     label 'windows&&docker'
                   }
             }
-            options{
-                timeout(5)
-            }
             stages{
                 stage("Setting up tests"){
                     steps{
@@ -132,7 +129,9 @@ pipeline {
                     parallel {
                         stage("PyTest"){
                             steps{
-                                bat "pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
+                                timeout(5){
+                                    bat "pytest.exe --junitxml=${WORKSPACE}/reports/junit-${env.NODE_NAME}-pytest.xml --junit-prefix=${env.NODE_NAME}-pytest --cov-report html:${WORKSPACE}/reports/coverage/ --cov=medusadownloader" //  --basetemp={envtmpdir}"
+                                }
 
                             }
                             post {
@@ -144,7 +143,9 @@ pipeline {
                         }
                         stage("MyPy"){
                             steps{
-                                bat "mypy.exe -p medusadownloader --html-report ${WORKSPACE}/reports/mypy_html > logs\\mypy.log"
+                                timeout(5){
+                                    bat "mypy.exe -p medusadownloader --html-report ${WORKSPACE}/reports/mypy_html > logs\\mypy.log"
+                                }
                             }
                             post{
                                 always {
@@ -155,11 +156,13 @@ pipeline {
                         }
                         stage("Run Flake8 Static Analysis") {
                             steps{
-                                script{
-                                    try{
-                                        bat "flake8 medusadownloader --tee --output-file=${WORKSPACE}\\logs\\flake8.log"
-                                    } catch (exc) {
-                                        echo "flake8 found some warnings"
+                                timeout(5){
+                                    script{
+                                        try{
+                                            bat "flake8 medusadownloader --tee --output-file=${WORKSPACE}\\logs\\flake8.log"
+                                        } catch (exc) {
+                                            echo "flake8 found some warnings"
+                                        }
                                     }
                                 }
                             }
