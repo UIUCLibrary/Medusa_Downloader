@@ -39,9 +39,6 @@ def get_package_name(stashName, metadataFile){
 
 pipeline {
     agent none
-    triggers {
-        cron('@daily')
-    }
     options {
         disableConcurrentBuilds()  //each branch has 1 job running at a time
 
